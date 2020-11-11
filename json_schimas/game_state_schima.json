@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/draft/2019-09/schema#",
+    "definitions": {
+        "ships": {
+            "type": "object",
+            "properties": {
+                "carrier": { "$ref": "#/definitions/ship" },
+                "battleship": { "$ref": "#/definitions/ship" },
+                "cruiser": { "$ref": "#/definitions/ship" },
+                "submarine": { "$ref": "#/definitions/ship" },
+                "destroyer": { "$ref": "#/definitions/ship" } 
+            }
+        },
+        "ship": {
+            "type": "object",
+            "properties": {
+                "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99
+                },
+                "isVertical": {
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    
+    "type": "object",
+    "properties": {
+        "player_ships": { "$ref": "#/definitions/ships" },
+        "opponent_ships": { "$ref": "#/definitions/ships" },
+        "grid": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 15
+            },
+            "minItems": 100,
+            "maxItems": 100
+        }
+    }
+}

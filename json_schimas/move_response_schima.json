@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/draft/2019-09/schema#",
+    "type": "object",
+    "properties": {
+        "moveResult": {
+            "type": "string",
+            "enum": [
+                "invalid_move",
+                "miss",
+                "hit",
+                "sunk_carrier",
+                "sunk_battleship",
+                "sunk_cruiser",
+                "sunk_submarine",
+                "sunk_destroyer"
+            ]
+        },
+        "gameState": {
+            "type": "string",
+            "enum": [
+                "lost",
+                "in_progress",
+                "won"
+            ]
+        },
+        "opponentMoved": {
+            "type": "bool"
+        },
+        "opponentMove": {
+            "type": "object",
+            "requred": false,
+            "properties": {
+                "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99
+                },
+                "moveResult": {
+                    "type": "string",
+                    "enum": [
+                        "miss",
+                        "hit",
+                        "sunk_carrier",
+                        "sunk_battleship",
+                        "sunk_cruiser",
+                        "sunk_submarine",
+                        "sunk_destroyer"
+                    ]
+                }
+            }
+        },
+        "if": {
+            "properties": { "opponentMoved": { "const": false } }
+        },
+        "then": {
+            "properties": { "opponentMove": { "requred": false } }
+        }
+    }
+}
