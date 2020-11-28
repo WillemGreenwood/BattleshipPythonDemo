@@ -69,7 +69,7 @@ class Game:
                 index = ship.index + (10 if ship.isVertial else 1) * i
                 self.state_grid[index][3] = name
             
-    def p1_move(self, index):
+    def p1_move(self, index) -> str:
         if index < 0 or index >= 100:
             raise IndexError(f"Move {index} outside game bounds!")
         if self.state_grid[index][0]:
@@ -87,7 +87,7 @@ class Game:
 
         return "miss"
 
-    def p2_move(self, index):
+    def p2_move(self, index) -> str:
         if index < 0 or index >= 100:
             raise IndexError(f"Move {index} outside game bounds!")
         if self.state_grid[index][0]:
@@ -105,7 +105,7 @@ class Game:
 
         return "miss"
 
-    def game_victor(self):
+    def game_victor(self) -> str:
         if self.p2_ships is 0:
             return "p1"
         elif self.p1_ships is 0:
