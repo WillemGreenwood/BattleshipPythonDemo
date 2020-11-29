@@ -1,5 +1,4 @@
 from .. import db
-from ..game.game_state import Game
 from datetime import datetime
 
 PLAYER_ONE_SHOT_MASK = 0b00000001
