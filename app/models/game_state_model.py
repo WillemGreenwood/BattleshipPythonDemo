@@ -121,8 +121,22 @@ class GameStateModel(db.Model):
     def markUpdate(self):
         self.last_updated = datetime.now()
 
-    def getState() -> dict:
+    def getState(self) -> dict:
         '''Returns a dict/JSON-like format of this object'''
+        def decode_ships(shipstr):
+            out = dict()
+            for k,v in SHIP_ID_MAPPING.items():
+                out[k] = {
+                    "index": ord(shipstr[1 + v*3]),
+                    "isVertial": (shipstr[2 + v*3] == "v")
+                }
+            return out
+        
+        return {
+            "player_ships": decode_ships(self.player_one_ships),
+            "opponent_ships": decode_ships(self.player_two_ships),
+            "grid": [ord(i) & (PLAYER_ONE_SHOT_MASK | PLAYER_TWO_SHOT_MASK) for i in self.grid_state]
+        }
 
 
 def newGame(player_one: dict, player_two: dict) -> GameStateModel:
