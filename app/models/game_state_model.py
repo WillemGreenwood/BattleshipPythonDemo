@@ -1,63 +1,150 @@
 from .. import db
 from ..game.game_state import Game
+from datetime import datetime
+
+PLAYER_ONE_SHOT_MASK = 0b00000001
+PLAYER_TWO_SHOT_MASK = 0b00000010
+PLAYER_ONE_SHIP_ID_MASK = 0b00011100
+PLAYER_TWO_SHIP_ID_MASK = 0b11100000
+SHIP_ID_MAPPING = {
+    "carrier"    : 0b001,  # 1
+    "battleship" : 0b010,  # 2
+    "cruiser"    : 0b011,  # 3
+    "submarine"  : 0b100,  # 4
+    "destroyer"  : 0b101   # 5
+}
+SHIP_SIZE = {
+    "ships" : 5,
+    "carrier" : 5,
+    "battleship" : 4,
+    "cruiser" : 3,
+    "submarine" : 3,
+    "destroyer" : 2
+}
 
 class GameStateModel(db.Model):
     """lorem ipsum"""
 
     __tablename__ = "gamestates"
 
-    id = db.Column(
-        "id",
+    # Session ID for the user, primary key
+    sesskey = db.Column(
+        "sesskey",
         db.Integer,
         primary_key=True
     )
 
-    sesskey = db.Column(
-        "sesskey",
-        db.Integer,
-        index=True
+    # Ship indexes and orientations for player one.
+    # Includes ship health and ships remaining.
+    # First char is the number of ships remaining,
+    # then for each of the following chars, the first
+    # is the index of the ship, the second is the 
+    # orientation (v vs h), and the third is the
+    # ship's remaining health.
+    player_one_ships = db.Column(
+        "player_one_ships",
+        db.String(16)
     )
 
-    player1Ships = db.Column(
-        "player1ships",
-        db.String(21)
+    # Ship indexes and orientations for player two.
+    # Includes ship health and ships remaining.
+    # First char is the number of ships remaining,
+    # then for each of the following chars, the first
+    # is the index of the ship, the second is the 
+    # orientation (v vs h), and the third is the
+    # ship's remaining health.
+    player_two_ships = db.Column(
+        "player_two_ships",
+        db.String(16)
     )
 
-    player2Ships = db.Column(
-        "player2ships",
-        db.String(21)
-    )
-
-    gridState = db.Column(
-        "gridstate",
+    # The grid of the game state
+    # String is 100 chars, each char is an 8-bit
+    # representation of the state of that cell
+    # in the grid. The rightmost bit is if p1
+    # has fired on that cell, second is if p2
+    # has fired, next three are the id of p1's
+    # ship if one intersects that cell, and the
+    # last three are the same for p2.
+    grid_state = db.Column(
+        "grid_state",
         db.String(100)
     )
 
-    lastUpdated = db.Column(
-        "lastupdated",
+    # The last time this entry was updated,
+    # used to cull old entries
+    last_updated = db.Column(
+        "last_updated",
         db.DateTime()
     )
 
-    @classmethod
-    def from_game_state(cls, game: Game) -> GameStateModel:
-        model = GameStateModel()
+    def move_player_one(self, i: int):
+        '''Simulate a shot fired by p1, returns True if hit, False if miss, None if shot already fired'''
+        cell = ord(self.grid_state[i])
+        
+        # Move has already been made?
+        if cell & PLAYER_ONE_SHOT_MASK:
+            return None
 
-        model.player1Ships = str(game.p1_ship_health["all"])
-        for name, ship in game.p1_pieces:
-            model.player1Ships += ("" if ship.index > 9 else "0")
-            model.player1Ships += str(ship.index)
-            model.player1Ships += ("v" if ship.isVertical else "h")
-            model.player1Ships += str(game.p1_ship_health[name])
+        # Hit p2 ship?
+        hit = bool(cell & PLAYER_TWO_SHIP_ID_MASK)
+        if hit:
+            ship_id = (cell & PLAYER_TWO_SHIP_ID_MASK) >> 5
+            self.player_two_ships = self.player_two_ships[:1 + ship_id * 3] + chr(ord(self.player_two_ships[1 + ship_id * 3]) - 1) + self.player_two_ships[2 + ship_id * 3:]
+            if ord(self.player_two_ships[1 + ship_id * 3]) == 0:
+                self.player_two_ships = chr(ord(self.player_two_ships[0]) - 1) + self.player_two_ships[1:]
 
-        model.player2Ships = str(game.p2_ship_health["all"])
-        for name, ship in game.p2_pieces:
-            model.player2Ships += ("" if ship.index > 9 else "0")
-            model.player2Ships += str(ship.index)
-            model.player2Ships += ("v" if ship.isVertical else "h")
-            model.player2Ships += str(game.p2_ship_health[name])
+        # Apply move
+        self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_ONE_SHOT_MASK) + self.grid_state[i+1:]
+        return hit
 
-        model.gridState = ""
-        for p1,p2,_,_ in game.state_grid:
-            model.gridState += str(p1 + (p2 << 1))
+    def move_player_two(self, i: int):
+        '''Simulate a shot fired by p1, returns True if hit, False if miss, None if shot already fired'''
+        cell = ord(self.grid_state[i])
+        
+        # Move has already been made?
+        if cell & PLAYER_TWO_SHOT_MASK:
+            return None
 
-        return model
+        # Hit p1 ship?
+        hit = bool(cell & PLAYER_ONE_SHIP_ID_MASK)
+        if hit:
+            ship_id = (cell & PLAYER_ONE_SHIP_ID_MASK) >> 2
+            self.player_one_ships = self.player_one_ships[:1 + ship_id * 3] + chr(ord(self.player_one_ships[1 + ship_id * 3]) - 1) + self.player_one_ships[2 + ship_id * 3:]
+            if ord(self.player_one_ships[1 + ship_id * 3]) == 0:
+                self.player_one_ships = chr(ord(self.player_one_ships[0]) - 1) + self.player_one_ships[1:]
+
+        # Apply move
+        self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_TWO_SHOT_MASK) + self.grid_state[i+1:]
+        return hit
+
+    def markUpdate(self):
+        self.last_updated = datetime.now()
+
+    def getState() -> dict:
+        '''Returns a dict/JSON-like format of this object'''
+
+
+def newGame(player_one: dict, player_two: dict) -> GameStateModel:
+    '''Creates a new game.'''
+    out = GameStateModel()
+
+    out.player_one_ships = chr(5)
+    for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+        out.player_one_ships += chr(player_one[ship]["index"]) + ("v" if chr(player_one[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+
+    out.player_two_ships = chr(5)
+    for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+        out.player_two_ships += chr(player_two[ship]["index"]) + ("v" if chr(player_two[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+
+    out.grid_state = chr(0) * 100
+
+    for k, v in player_one.items():
+        for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+            out.grid_state = out.grid_state[:cell] + chr(SHIP_ID_MAPPING[k] << 2) + out.grid_state[cell+1:]
+
+    for k, v in player_two.items():
+        for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+            out.grid_state = out.grid_state[:cell] + chr(ord(out.grid_state[cell]) + (SHIP_ID_MAPPING[k] << 5)) + out.grid_state[cell+1:]
+
+    return out
