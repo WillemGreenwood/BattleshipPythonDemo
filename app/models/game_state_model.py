@@ -87,16 +87,17 @@ class GameStateModel(db.Model):
             return None
 
         # Hit p2 ship?
-        hit = bool(cell & PLAYER_TWO_SHIP_ID_MASK)
-        if hit:
+        hit_result = "miss"
+        if cell & PLAYER_TWO_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_TWO_SHIP_ID_MASK) >> 5
             self.player_two_ships = self.player_two_ships[:1 + ship_id * 3] + chr(ord(self.player_two_ships[1 + ship_id * 3]) - 1) + self.player_two_ships[2 + ship_id * 3:]
             if ord(self.player_two_ships[1 + ship_id * 3]) == 0:
                 self.player_two_ships = chr(ord(self.player_two_ships[0]) - 1) + self.player_two_ships[1:]
+                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_ONE_SHOT_MASK) + self.grid_state[i+1:]
-        return hit
+        return hit_result
 
     def move_player_two(self, i: int):
         '''Simulate a shot fired by p1, returns True if hit, False if miss, None if shot already fired'''
@@ -107,16 +108,17 @@ class GameStateModel(db.Model):
             return None
 
         # Hit p1 ship?
-        hit = bool(cell & PLAYER_ONE_SHIP_ID_MASK)
-        if hit:
+        hit_result = "miss"
+        if cell & PLAYER_ONE_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_ONE_SHIP_ID_MASK) >> 2
             self.player_one_ships = self.player_one_ships[:1 + ship_id * 3] + chr(ord(self.player_one_ships[1 + ship_id * 3]) - 1) + self.player_one_ships[2 + ship_id * 3:]
             if ord(self.player_one_ships[1 + ship_id * 3]) == 0:
                 self.player_one_ships = chr(ord(self.player_one_ships[0]) - 1) + self.player_one_ships[1:]
+                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_TWO_SHOT_MASK) + self.grid_state[i+1:]
-        return hit
+        return hit_result
 
     def markUpdate(self):
         self.last_updated = datetime.now()
