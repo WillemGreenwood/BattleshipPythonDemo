@@ -1,5 +1,6 @@
 from .. import db
 from datetime import datetime
+from ..common import SHIP_SIZE
 
 PLAYER_ONE_SHOT_MASK = 0b00000001
 PLAYER_TWO_SHOT_MASK = 0b00000010
@@ -11,14 +12,6 @@ SHIP_ID_MAPPING = {
     "cruiser"    : 0b011,  # 3
     "submarine"  : 0b100,  # 4
     "destroyer"  : 0b101   # 5
-}
-SHIP_SIZE = {
-    "ships" : 5,
-    "carrier" : 5,
-    "battleship" : 4,
-    "cruiser" : 3,
-    "submarine" : 3,
-    "destroyer" : 2
 }
 
 class GameStateModel(db.Model):
