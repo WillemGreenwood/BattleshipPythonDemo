@@ -4,10 +4,10 @@ from flask import current_app as app
 def battleship_game_state(): 
     pass
 
-@app.route('/battleship/move/<index>', methods=['PUSH'])
-def battleship_game_move(index): 
+@app.route('/battleship', methods=['PUT'])
+def battleship_game_new(): 
     pass
 
-@app.route('/battleship/new', methods=['PUSH'])
-def battleship_game_new(): 
+@app.route('/battleship/move/<index>', methods=['PUSH'])
+def battleship_game_move(index): 
     pass
