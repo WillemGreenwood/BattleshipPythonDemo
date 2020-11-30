@@ -6,9 +6,8 @@ Implementation standard of a Battleship game
 | URI | Method | Purpous |
 | --- | --- | --- |
 | `~/battleship` | `GET` | Get the current game state. |
+| `~/battleship` | `PUT` | Create a new game. Should assign an ID cookie if one was not already established. |
 | `~/battleship/move/<index>` | `PUSH` | If the move is valid, returns the results of the move, and the opponent's following move. If the move ends the game, includes the corrisponding flag. If the move is invalid, returns the appropriate flag. If the game specified by the request's cookies doesn't exist, returns `404 NOT FOUND`. |
-| `~/battleship/new` | `PUSH` | Create a new game. Should assign an ID cookie if one was not already established. |
-||||
 
 
 ## JSON Schimas
