@@ -75,10 +75,10 @@ class GameStateModel(db.Model):
         hit_result = "miss"
         if cell & PLAYER_TWO_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_TWO_SHIP_ID_MASK) >> 5
-            self.player_two_ships = self.player_two_ships[:1 + ship_id * 3] + chr(ord(self.player_two_ships[1 + ship_id * 3]) - 1) + self.player_two_ships[2 + ship_id * 3:]
-            if ord(self.player_two_ships[1 + ship_id * 3]) == 0:
+            self.player_two_ships = self.player_two_ships[:ship_id * 3 - 1] + chr(ord(self.player_two_ships[ship_id * 3 - 1]) - 1) + self.player_two_ships[ship_id * 3:]
+            if ord(self.player_two_ships[ship_id * 3 - 1]) == 0:
                 self.player_two_ships = chr(ord(self.player_two_ships[0]) - 1) + self.player_two_ships[1:]
-                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
+                hit_result = f"sunk_{[k for k,v in SHIP_ID_MAPPING.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_ONE_SHOT_MASK) + self.grid_state[i+1:]
@@ -96,10 +96,10 @@ class GameStateModel(db.Model):
         hit_result = "miss"
         if cell & PLAYER_ONE_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_ONE_SHIP_ID_MASK) >> 2
-            self.player_one_ships = self.player_one_ships[:1 + ship_id * 3] + chr(ord(self.player_one_ships[1 + ship_id * 3]) - 1) + self.player_one_ships[2 + ship_id * 3:]
-            if ord(self.player_one_ships[1 + ship_id * 3]) == 0:
+            self.player_one_ships = self.player_one_ships[:ship_id * 3 - 1] + chr(ord(self.player_one_ships[ship_id * 3 - 1]) - 1) + self.player_one_ships[ship_id * 3:]
+            if ord(self.player_one_ships[ship_id * 3 - 1]) == 0:
                 self.player_one_ships = chr(ord(self.player_one_ships[0]) - 1) + self.player_one_ships[1:]
-                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
+                hit_result = f"sunk_{[k for k,v in SHIP_ID_MAPPING.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_TWO_SHOT_MASK) + self.grid_state[i+1:]

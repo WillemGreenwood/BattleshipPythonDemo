@@ -7,8 +7,8 @@ class GameStateModelTest(unittest.TestCase):
     def setUp(self):
         self.game = GameStateModel()
         # All ships ligned up verticaly, largest in top left corner, moving right.
-        self.game.player_one_ships = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02"
-        self.game.player_two_ships = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02"
+        self.game.player_one_ships = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02v"
+        self.game.player_two_ships = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02v"
         self.game.grid_state = "".join((
             "\x24\x48\x6c\x90\xb4\x00\x00\x00\x00\x00",
             "\x24\x48\x6c\x90\xb4\x00\x00\x00\x00\x00",
@@ -22,55 +22,87 @@ class GameStateModelTest(unittest.TestCase):
             "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         ))
 
+    def test_move_player_one_hit(self):
+        expected_return = "miss"
+        expected_ship_state = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x01v"
+
+        actual_return = self.game.move_player_one(4+0*10)  # Row 0, Col 4
+        actual_ship_state = self.game.player_two_ships
+
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
+
+    def test_move_player_one_miss(self):
+        expected_return = "miss"
+        expected_ship_state = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02v"
+
+        actual_return = self.game.move_player_one(3+3*10)  # Row 3, Col 3
+        actual_ship_state = self.game.player_two_ships
+
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
+
     def test_move_player_one_moves_correct_index(self):
-        self.game.move_player_one(3+3*10)
-        self.game.move_player_one(3+8*10)
-        self.game.move_player_one(7+3*10)
-        self.game.move_player_one(7+8*10)
-        self.assertEqual('\x01', self.game.grid_state[3+3*10])
-        self.assertEqual('\x01', self.game.grid_state[3+8*10])
-        self.assertEqual('\x01', self.game.grid_state[7+3*10])
-        self.assertEqual('\x01', self.game.grid_state[7+8*10])
+        self.game.move_player_one(3+3*10)  # Row 3, Col 3
+        self.game.move_player_one(3+8*10)  # Row 8, Col 3
+        self.game.move_player_one(7+3*10)  # Row 3, Col 7
+        self.game.move_player_one(7+8*10)  # Row 8, Col 7
+        self.assertEqual('\x01', self.game.grid_state[3+3*10])  # Row 3, Col 3
+        self.assertEqual('\x01', self.game.grid_state[3+8*10])  # Row 8, Col 3
+        self.assertEqual('\x01', self.game.grid_state[7+3*10])  # Row 3, Col 7
+        self.assertEqual('\x01', self.game.grid_state[7+8*10])  # Row 8, Col 7
+
+    def test_move_player_one_sunk(self):
+        expected_return = "sunk_destroyer"
+        expected_ship_state = "\x04\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x00v"
+
+        actual_return = self.game.move_player_one(4+0*10)  # Row 0, Col 4
+        actual_return = self.game.move_player_one(4+1*10)  # Row 1, Col 4
+        actual_ship_state = self.game.player_two_ships
+
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
+
+    def test_move_player_two_hit(self):
+        expected_return = "miss"
+        expected_ship_state = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x01v"
+
+        actual_return = self.game.move_player_two(4+0*10)  # Row 0, Col 4
+        actual_ship_state = self.game.player_one_ships
+
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
+
+    def test_move_player_two_miss(self):
+        expected_return = "miss"
+        expected_ship_state = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x02v"
+
+        actual_return = self.game.move_player_two(3+3*10)  # Row 3, Col 3
+        actual_ship_state = self.game.player_one_ships
+
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
 
     def test_move_player_two_moves_correct_index(self):
-        self.game.move_player_two(3+3*10)
-        self.game.move_player_two(3+8*10)
-        self.game.move_player_two(7+3*10)
-        self.game.move_player_two(7+8*10)
-        self.assertEqual('\x02', self.game.grid_state[3+3*10])
-        self.assertEqual('\x02', self.game.grid_state[3+8*10])
-        self.assertEqual('\x02', self.game.grid_state[7+3*10])
-        self.assertEqual('\x02', self.game.grid_state[7+8*10])
+        self.game.move_player_two(3+3*10)  # Row 3, Col 3
+        self.game.move_player_two(3+8*10)  # Row 8, Col 3
+        self.game.move_player_two(7+3*10)  # Row 3, Col 7
+        self.game.move_player_two(7+8*10)  # Row 8, Col 7
+        self.assertEqual('\x02', self.game.grid_state[3+3*10])  # Row 3, Col 3
+        self.assertEqual('\x02', self.game.grid_state[3+8*10])  # Row 8, Col 3
+        self.assertEqual('\x02', self.game.grid_state[7+3*10])  # Row 3, Col 7
+        self.assertEqual('\x02', self.game.grid_state[7+8*10])  # Row 8, Col 7
 
-    def test_move_player_one_returns_miss(self):
-        pass
+    def test_move_player_two_sunk(self):
+        expected_return = "sunk_destroyer"
+        expected_ship_state = "\x04\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x00v"
 
-    def test_move_player_two_returns_miss(self):
-        pass
+        actual_return = self.game.move_player_two(4+0*10)  # Row 0, Col 4
+        actual_return = self.game.move_player_two(4+1*10)  # Row 1, Col 4
+        actual_ship_state = self.game.player_one_ships
 
-    def test_move_player_one_returns_hit(self):
-        pass
-
-    def test_move_player_two_returns_hit(self):
-        pass
-
-    def test_move_player_one_returns_sunk(self):
-        pass
-
-    def test_move_player_two_returns_sunk(self):
-        pass
-
-    def test_move_player_one_updates_ship_health(self):
-        pass
-
-    def test_move_player_two_updates_ship_health(self):
-        pass
-
-    def test_move_player_one_updates_ships_remaining(self):
-        pass
-
-    def test_move_player_two_updates_ships_remaining(self):
-        pass
+        self.assertEqual(expected_return, actual_return)
+        self.assertEqual(expected_ship_state, actual_ship_state)
 
 class FunctionsTest(unittest.TestCase):
     pass
