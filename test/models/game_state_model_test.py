@@ -104,5 +104,33 @@ class GameStateModelTest(unittest.TestCase):
         self.assertEqual(expected_return, actual_return)
         self.assertEqual(expected_ship_state, actual_ship_state)
 
+    def test_mark_update(self):
+        # Build
+        import app.models.game_state_model as gsm
+        temp_datetime = gsm.datetime
+        gsm.datetime = mock_datetime()
+        expected = gsm.datetime.value()
+        
+        # Run
+        self.game.markUpdate()
+        actual = self.game.last_updated
+
+        # Check
+        self.assertEqual(expected, actual)
+
+        # Teardown
+        gsm.datetime = temp_datetime
+
+class mock_datetime:
+    def __init__(self):
+        from datetime import datetime
+        self.cargo = datetime.now()
+
+    def value(self):
+        return self.cargo
+
+    def now(self):
+        return self.value()
+
 class FunctionsTest(unittest.TestCase):
     pass
