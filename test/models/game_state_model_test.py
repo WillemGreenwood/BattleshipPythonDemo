@@ -1,5 +1,4 @@
 from app.models.game_state_model import GameStateModel
-from app.models.game_state_model import newGame
 import unittest
 
 class GameStateModelTest(unittest.TestCase):
@@ -189,7 +188,7 @@ class GameStateModelTest(unittest.TestCase):
         player_one = self.player_ships
         player_two = self.opponent_ships
 
-        actual = newGame(player_one, player_two)
+        actual = GameStateModel.newGame(player_one, player_two)
 
         self.assertEqual(expected.player_one_ships, actual.player_one_ships)
         self.assertEqual(expected.player_two_ships, actual.player_two_ships)
@@ -205,6 +204,3 @@ class mock_datetime:
 
     def now(self):
         return self.value()
-
-class FunctionsTest(unittest.TestCase):
-    pass
