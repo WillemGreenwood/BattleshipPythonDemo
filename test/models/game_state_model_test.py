@@ -121,6 +121,66 @@ class GameStateModelTest(unittest.TestCase):
         # Teardown
         gsm.datetime = temp_datetime
 
+    def test_get_state_returns_expected(self):
+        expected = {
+            "player_ships": {
+                    "carrier"    : {
+                        "index": 0,
+                        "isVertical": True
+                    },
+                    "battleship" : {
+                        "index": 1,
+                        "isVertical": True
+                    },
+                    "cruiser"    : {
+                        "index": 2,
+                        "isVertical": True
+                    },
+                    "submarine"  : {
+                        "index": 3,
+                        "isVertical": True
+                    },
+                    "destroyer"  : {
+                        "index": 4,
+                        "isVertical": True
+                    }
+                },
+            "opponent_ships": {
+                    "carrier"    : {
+                        "index": 0,
+                        "isVertical": True
+                    },
+                    "battleship" : {
+                        "index": 1,
+                        "isVertical": True
+                    },
+                    "cruiser"    : {
+                        "index": 2,
+                        "isVertical": True
+                    },
+                    "submarine"  : {
+                        "index": 3,
+                        "isVertical": True
+                    },
+                    "destroyer"  : {
+                        "index": 4,
+                        "isVertical": True
+                    }
+                },
+            "grid": [0 for i in range(100)]
+        }
+
+        actual = self.game.getState()
+
+        for k,v in actual["player_ships"].items():
+            self.assertEqual(expected["player_ships"][k]["index"], v["index"])
+            self.assertEqual(expected["player_ships"][k]["isVertical"], v["isVertical"])
+        for k,v in actual["opponent_ships"].items():
+            self.assertEqual(expected["opponent_ships"][k]["index"], v["index"])
+            self.assertEqual(expected["opponent_ships"][k]["isVertical"], v["isVertical"])
+        for i in range(100):
+            self.assertEqual(expected["grid"][i], actual["grid"][i])
+
 class mock_datetime:
     def __init__(self):
         from datetime import datetime

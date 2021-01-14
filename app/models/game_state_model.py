@@ -114,8 +114,8 @@ class GameStateModel(db.Model):
             out = dict()
             for k,v in SHIP_ID_MAPPING.items():
                 out[k] = {
-                    "index": ord(shipstr[1 + v*3]),
-                    "isVertial": (shipstr[2 + v*3] == "v")
+                    "index": ord(shipstr[v*3 - 2]),
+                    "isVertical": (shipstr[v*3] == "v")
                 }
             return out
         
