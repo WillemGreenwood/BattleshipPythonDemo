@@ -132,11 +132,11 @@ def newGame(player_one: dict, player_two: dict) -> GameStateModel:
 
     out.player_one_ships = chr(5)
     for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
-        out.player_one_ships += chr(player_one[ship]["index"]) + ("v" if chr(player_one[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+        out.player_one_ships += chr(player_one[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_one[ship]["isVertical"]) else "h")
 
     out.player_two_ships = chr(5)
     for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
-        out.player_two_ships += chr(player_two[ship]["index"]) + ("v" if chr(player_two[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+        out.player_two_ships += chr(player_two[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_two[ship]["isVertical"]) else "h")
 
     out.grid_state = chr(0) * 100
 

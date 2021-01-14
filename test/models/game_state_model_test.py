@@ -22,6 +22,51 @@ class GameStateModelTest(unittest.TestCase):
             "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         ))
 
+        self.player_ships = {
+                "carrier"    : {
+                    "index": 0,
+                    "isVertical": True
+                },
+                "battleship" : {
+                    "index": 1,
+                    "isVertical": True
+                },
+                "cruiser"    : {
+                    "index": 2,
+                    "isVertical": True
+                },
+                "submarine"  : {
+                    "index": 3,
+                    "isVertical": True
+                },
+                "destroyer"  : {
+                    "index": 4,
+                    "isVertical": True
+                }
+            }
+        self.opponent_ships = {
+                "carrier"    : {
+                    "index": 0,
+                    "isVertical": True
+                },
+                "battleship" : {
+                    "index": 1,
+                    "isVertical": True
+                },
+                "cruiser"    : {
+                    "index": 2,
+                    "isVertical": True
+                },
+                "submarine"  : {
+                    "index": 3,
+                    "isVertical": True
+                },
+                "destroyer"  : {
+                    "index": 4,
+                    "isVertical": True
+                }
+            }
+
     def test_move_player_one_hit(self):
         expected_return = "miss"
         expected_ship_state = "\x05\x00\x05v\x01\x04v\x02\x03v\x03\x03v\x04\x01v"
@@ -123,50 +168,8 @@ class GameStateModelTest(unittest.TestCase):
 
     def test_get_state_returns_expected(self):
         expected = {
-            "player_ships": {
-                    "carrier"    : {
-                        "index": 0,
-                        "isVertical": True
-                    },
-                    "battleship" : {
-                        "index": 1,
-                        "isVertical": True
-                    },
-                    "cruiser"    : {
-                        "index": 2,
-                        "isVertical": True
-                    },
-                    "submarine"  : {
-                        "index": 3,
-                        "isVertical": True
-                    },
-                    "destroyer"  : {
-                        "index": 4,
-                        "isVertical": True
-                    }
-                },
-            "opponent_ships": {
-                    "carrier"    : {
-                        "index": 0,
-                        "isVertical": True
-                    },
-                    "battleship" : {
-                        "index": 1,
-                        "isVertical": True
-                    },
-                    "cruiser"    : {
-                        "index": 2,
-                        "isVertical": True
-                    },
-                    "submarine"  : {
-                        "index": 3,
-                        "isVertical": True
-                    },
-                    "destroyer"  : {
-                        "index": 4,
-                        "isVertical": True
-                    }
-                },
+            "player_ships": self.player_ships,
+            "opponent_ships": self.opponent_ships,
             "grid": [0 for i in range(100)]
         }
 
@@ -180,6 +183,17 @@ class GameStateModelTest(unittest.TestCase):
             self.assertEqual(expected["opponent_ships"][k]["isVertical"], v["isVertical"])
         for i in range(100):
             self.assertEqual(expected["grid"][i], actual["grid"][i])
+
+    def test_new_game_makes_new_game(self):
+        expected = self.game
+        player_one = self.player_ships
+        player_two = self.opponent_ships
+
+        actual = newGame(player_one, player_two)
+
+        self.assertEqual(expected.player_one_ships, actual.player_one_ships)
+        self.assertEqual(expected.player_two_ships, actual.player_two_ships)
+        self.assertEqual(expected.grid_state, actual.grid_state)
 
 class mock_datetime:
     def __init__(self):
