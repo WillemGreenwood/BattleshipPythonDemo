@@ -9,7 +9,7 @@ r = Random()
 def generateShips() -> dict:
     '''Generates a non-overlaping configuration of ships.'''
     out = dict()
-    for ship, size in SHIP_SIZE.keys():
+    for ship, size in SHIP_SIZE.items():
         out[ship] = {
             "index": r.randint(0, 99),
             "isVertical": bool(r.randint(0, 1))
