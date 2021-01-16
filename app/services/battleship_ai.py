@@ -22,7 +22,7 @@ def move(game: GameStateModel) -> tuple:
     '''Performs an AI move on the game (as player two). Returns the move made, and it's result.'''
     options = []
     for i in range(100):
-        if game.grid_state[i] & PLAYER_TWO_SHOT_MASK:
+        if not ord(game.grid_state[i]) & PLAYER_TWO_SHOT_MASK:
             options.append(i)
     i = r.choice(options)
     return (i, game.move_player_two(i))
