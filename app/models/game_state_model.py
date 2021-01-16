@@ -75,10 +75,10 @@ class GameStateModel(db.Model):
         hit_result = "miss"
         if cell & PLAYER_TWO_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_TWO_SHIP_ID_MASK) >> 5
-            self.player_two_ships = self.player_two_ships[:1 + ship_id * 3] + chr(ord(self.player_two_ships[1 + ship_id * 3]) - 1) + self.player_two_ships[2 + ship_id * 3:]
-            if ord(self.player_two_ships[1 + ship_id * 3]) == 0:
+            self.player_two_ships = self.player_two_ships[:ship_id * 3 - 1] + chr(ord(self.player_two_ships[ship_id * 3 - 1]) - 1) + self.player_two_ships[ship_id * 3:]
+            if ord(self.player_two_ships[ship_id * 3 - 1]) == 0:
                 self.player_two_ships = chr(ord(self.player_two_ships[0]) - 1) + self.player_two_ships[1:]
-                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
+                hit_result = f"sunk_{[k for k,v in SHIP_ID_MAPPING.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_ONE_SHOT_MASK) + self.grid_state[i+1:]
@@ -96,10 +96,10 @@ class GameStateModel(db.Model):
         hit_result = "miss"
         if cell & PLAYER_ONE_SHIP_ID_MASK:
             ship_id = (cell & PLAYER_ONE_SHIP_ID_MASK) >> 2
-            self.player_one_ships = self.player_one_ships[:1 + ship_id * 3] + chr(ord(self.player_one_ships[1 + ship_id * 3]) - 1) + self.player_one_ships[2 + ship_id * 3:]
-            if ord(self.player_one_ships[1 + ship_id * 3]) == 0:
+            self.player_one_ships = self.player_one_ships[:ship_id * 3 - 1] + chr(ord(self.player_one_ships[ship_id * 3 - 1]) - 1) + self.player_one_ships[ship_id * 3:]
+            if ord(self.player_one_ships[ship_id * 3 - 1]) == 0:
                 self.player_one_ships = chr(ord(self.player_one_ships[0]) - 1) + self.player_one_ships[1:]
-                hit_result = f"sunk_{[k for k,v in SHIP_SIZE.items() if v == ship_id][0]}"
+                hit_result = f"sunk_{[k for k,v in SHIP_ID_MAPPING.items() if v == ship_id][0]}"
 
         # Apply move
         self.grid_state = self.grid_state[:i] + chr(cell | PLAYER_TWO_SHOT_MASK) + self.grid_state[i+1:]
@@ -114,8 +114,8 @@ class GameStateModel(db.Model):
             out = dict()
             for k,v in SHIP_ID_MAPPING.items():
                 out[k] = {
-                    "index": ord(shipstr[1 + v*3]),
-                    "isVertial": (shipstr[2 + v*3] == "v")
+                    "index": ord(shipstr[v*3 - 2]),
+                    "isVertical": (shipstr[v*3] == "v")
                 }
             return out
         
@@ -126,26 +126,27 @@ class GameStateModel(db.Model):
         }
 
 
-def newGame(player_one: dict, player_two: dict) -> GameStateModel:
-    '''Creates a new game.'''
-    out = GameStateModel()
+    @classmethod
+    def newGame(cls, player_one: dict, player_two: dict):
+        '''Creates a new game.'''
+        out = GameStateModel()
 
-    out.player_one_ships = chr(5)
-    for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
-        out.player_one_ships += chr(player_one[ship]["index"]) + ("v" if chr(player_one[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+        out.player_one_ships = chr(5)
+        for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+            out.player_one_ships += chr(player_one[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_one[ship]["isVertical"]) else "h")
 
-    out.player_two_ships = chr(5)
-    for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
-        out.player_two_ships += chr(player_two[ship]["index"]) + ("v" if chr(player_two[ship]["isVertical"]) else "h") + chr(SHIP_SIZE[ship])
+        out.player_two_ships = chr(5)
+        for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+            out.player_two_ships += chr(player_two[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_two[ship]["isVertical"]) else "h")
 
-    out.grid_state = chr(0) * 100
+        out.grid_state = chr(0) * 100
 
-    for k, v in player_one.items():
-        for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
-            out.grid_state = out.grid_state[:cell] + chr(SHIP_ID_MAPPING[k] << 2) + out.grid_state[cell+1:]
+        for k, v in player_one.items():
+            for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+                out.grid_state = out.grid_state[:cell] + chr(SHIP_ID_MAPPING[k] << 2) + out.grid_state[cell+1:]
 
-    for k, v in player_two.items():
-        for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
-            out.grid_state = out.grid_state[:cell] + chr(ord(out.grid_state[cell]) + (SHIP_ID_MAPPING[k] << 5)) + out.grid_state[cell+1:]
+        for k, v in player_two.items():
+            for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+                out.grid_state = out.grid_state[:cell] + chr(ord(out.grid_state[cell]) + (SHIP_ID_MAPPING[k] << 5)) + out.grid_state[cell+1:]
 
-    return out
+        return out
