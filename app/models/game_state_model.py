@@ -12,10 +12,10 @@ class GameStateModel(db.Model):
 
     __tablename__ = "gamestates"
 
-    # Session ID for the user, primary key
-    sesskey = db.Column(
-        "sesskey",
-        db.Integer,
+    # User ID for the user, primary key
+    user_id = db.Column(
+        "user_id",
+        db.String(16),
         primary_key=True
     )
 
