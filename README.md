@@ -20,11 +20,11 @@ Implementation standard of a Battleship game
         "ships": {
             "type": "object",
             "properties": {
-                "carrier": { "$ref": "#/definitions/ship" },
-                "battleship": { "$ref": "#/definitions/ship" },
-                "cruiser": { "$ref": "#/definitions/ship" },
-                "submarine": { "$ref": "#/definitions/ship" },
-                "destroyer": { "$ref": "#/definitions/ship" } 
+                "carrier": { "$ref": "#/definitions/ship", "required": true },
+                "battleship": { "$ref": "#/definitions/ship", "required": true },
+                "cruiser": { "$ref": "#/definitions/ship", "required": true },
+                "submarine": { "$ref": "#/definitions/ship", "required": true },
+                "destroyer": { "$ref": "#/definitions/ship", "required": true } 
             }
         },
         "ship": {
@@ -32,22 +32,34 @@ Implementation standard of a Battleship game
             "properties": {
                 "index": {
                     "type": "integer",
+                    "required": true,
                     "minimum": 0,
                     "maximum": 99
                 },
                 "isVertical": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "required": true
                 }
             }
         }
     },
-    
+
     "type": "object",
     "properties": {
-        "player_ships": { "$ref": "#/definitions/ships" },
-        "opponent_ships": { "$ref": "#/definitions/ships" },
+        "gameState": {
+            "type": "string",
+            "required": true,
+            "enum": [
+                "lost",
+                "in_progress",
+                "won"
+            ]
+        },
+        "playerShips": { "$ref": "#/definitions/ships", "required": true },
+        "opponentShips": { "$ref": "#/definitions/ships", "required": true },
         "grid": {
             "type": "array",
+            "required": true,
             "items": {
                 "type": "integer",
                 "minimum": 0,
@@ -66,8 +78,15 @@ Implementation standard of a Battleship game
     "$schema": "http://json-schema.org/draft/2019-09/schema#",
     "type": "object",
     "properties": {
+        "index": {
+            "type": "integer",
+            "required": true,
+            "minimum": 0,
+            "maximum": 99
+        },
         "moveResult": {
             "type": "string",
+            "required": true,
             "enum": [
                 "invalid_move",
                 "miss",
@@ -81,6 +100,7 @@ Implementation standard of a Battleship game
         },
         "gameState": {
             "type": "string",
+            "required": true,
             "enum": [
                 "lost",
                 "in_progress",
@@ -88,19 +108,21 @@ Implementation standard of a Battleship game
             ]
         },
         "opponentMoved": {
-            "type": "bool"
+            "type": "boolean",
+            "required": true
         },
         "opponentMove": {
             "type": "object",
-            "requred": false,
             "properties": {
                 "index": {
                     "type": "integer",
+                    "required": true,
                     "minimum": 0,
                     "maximum": 99
                 },
                 "moveResult": {
                     "type": "string",
+                    "required": true,
                     "enum": [
                         "miss",
                         "hit",
@@ -112,13 +134,13 @@ Implementation standard of a Battleship game
                     ]
                 }
             }
-        },
-        "if": {
-            "properties": { "opponentMoved": { "const": false } }
-        },
-        "then": {
-            "properties": { "opponentMove": { "requred": false } }
         }
+    },
+    "if": {
+        "properties": { "opponentMoved": { "const": true } }
+    },
+    "then": {
+        "required": ["opponentMove"]
     }
 }
 ```
@@ -134,10 +156,12 @@ Implementation standard of a Battleship game
                 "index": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 99
+                    "maximum": 99,
+                    "required": true
                 },
                 "isVertical": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "required": true
                 }
             }
         }
@@ -145,11 +169,11 @@ Implementation standard of a Battleship game
     
     "type": "object",
     "properties": {
-        "carrier": { "$ref": "#/definitions/ship" },
-        "battleship": { "$ref": "#/definitions/ship" },
-        "cruiser": { "$ref": "#/definitions/ship" },
-        "submarine": { "$ref": "#/definitions/ship" },
-        "destroyer": { "$ref": "#/definitions/ship" }
+        "carrier": { "$ref": "#/definitions/ship", "required": true },
+        "battleship": { "$ref": "#/definitions/ship", "required": true },
+        "cruiser": { "$ref": "#/definitions/ship", "required": true },
+        "submarine": { "$ref": "#/definitions/ship", "required": true },
+        "destroyer": { "$ref": "#/definitions/ship", "required": true }
     }
 }
 ```

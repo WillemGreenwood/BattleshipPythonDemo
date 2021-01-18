@@ -2,8 +2,15 @@
     "$schema": "http://json-schema.org/draft/2019-09/schema#",
     "type": "object",
     "properties": {
+        "index": {
+            "type": "integer",
+            "required": true,
+            "minimum": 0,
+            "maximum": 99
+        },
         "moveResult": {
             "type": "string",
+            "required": true,
             "enum": [
                 "invalid_move",
                 "miss",
@@ -17,6 +24,7 @@
         },
         "gameState": {
             "type": "string",
+            "required": true,
             "enum": [
                 "lost",
                 "in_progress",
@@ -24,19 +32,21 @@
             ]
         },
         "opponentMoved": {
-            "type": "bool"
+            "type": "boolean",
+            "required": true
         },
         "opponentMove": {
             "type": "object",
-            "requred": false,
             "properties": {
                 "index": {
                     "type": "integer",
+                    "required": true,
                     "minimum": 0,
                     "maximum": 99
                 },
                 "moveResult": {
                     "type": "string",
+                    "required": true,
                     "enum": [
                         "miss",
                         "hit",
@@ -48,12 +58,12 @@
                     ]
                 }
             }
-        },
-        "if": {
-            "properties": { "opponentMoved": { "const": false } }
-        },
-        "then": {
-            "properties": { "opponentMove": { "requred": false } }
         }
+    },
+    "if": {
+        "properties": { "opponentMoved": { "const": true } }
+    },
+    "then": {
+        "required": ["opponentMove"]
     }
 }

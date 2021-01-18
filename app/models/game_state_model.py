@@ -122,8 +122,8 @@ class GameStateModel(db.Model):
             return out
         
         return {
-            "player_ships": decode_ships(self.player_one_ships),
-            "opponent_ships": decode_ships(self.player_two_ships),
+            "playerShips": decode_ships(self.player_one_ships),
+            "opponentShips": decode_ships(self.player_two_ships),
             "grid": [ord(i) & (PLAYER_ONE_SHOT_MASK | PLAYER_TWO_SHOT_MASK) for i in self.grid_state]
         }
 
