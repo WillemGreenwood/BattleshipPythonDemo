@@ -12,7 +12,10 @@ def create_app():
 
     with app.app_context():
         # models
+        from .models.game_state_model import GameStateModel
         db.create_all()
+
+        # routes
         from .routes import battleship
 
     return app

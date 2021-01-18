@@ -10,7 +10,6 @@ SHIP_ID_MAPPING = {
     "destroyer"  : 0b101   # 5
 }
 SHIP_SIZE = {
-    "ships" : 5,
     "carrier" : 5,
     "battleship" : 4,
     "cruiser" : 3,
