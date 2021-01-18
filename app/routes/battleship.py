@@ -20,7 +20,9 @@ def battleship_game_state():
     if game is None:
         return make_response("No game found!", 404)  # Not Found
 
-    return make_response(jsonify(game.getState()), 200)  # Ok
+    state = game.getState()
+    state["gameState"] = win_state_map[game.getWinState()]
+    return make_response(jsonify(), 200)  # Ok
 
 
 @app.route('/battleship', methods=['PUT'])
@@ -62,6 +64,7 @@ def battleship_game_move(index):
 
     player_move_result = game.move_player_one(index)
     move_result = {
+        "index": index,
         "moveResult": player_move_result,
         "opponentMoved": False
     }
