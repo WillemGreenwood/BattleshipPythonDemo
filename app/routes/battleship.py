@@ -1,4 +1,4 @@
-from flask import make_response, request, current_app as app
+from flask import jsonify, make_response, request, current_app as app
 from random import Random
 from ..models.game_state_model import GameStateModel
 from ..services.json import validate, NEW_GAME_REQUEST_SCHEMA
@@ -9,7 +9,14 @@ r = Random()
 
 @app.route('/battleship', methods=['GET'])
 def battleship_game_state(): 
-    pass
+    user_id = request.cookies.get("battleship_user_id")
+    game = GameStateModel.query.get(user_id)
+
+    if game is None:
+        return make_response("No game found!", 404)  # Not Found
+
+    return make_response(jsonify(game.getState()), 200)  # Ok
+
 
 @app.route('/battleship', methods=['PUT'])
 def battleship_game_new(): 
