@@ -69,11 +69,12 @@ class GameStateModel(db.Model):
         
         # Move has already been made?
         if cell & PLAYER_ONE_SHOT_MASK:
-            return None
+            return "invalid_move"
 
         # Hit p2 ship?
         hit_result = "miss"
         if cell & PLAYER_TWO_SHIP_ID_MASK:
+            hit_result = "hit"
             ship_id = (cell & PLAYER_TWO_SHIP_ID_MASK) >> 5
             self.player_two_ships = self.player_two_ships[:ship_id * 3 - 1] + chr(ord(self.player_two_ships[ship_id * 3 - 1]) - 1) + self.player_two_ships[ship_id * 3:]
             if ord(self.player_two_ships[ship_id * 3 - 1]) == 0:
@@ -90,11 +91,12 @@ class GameStateModel(db.Model):
         
         # Move has already been made?
         if cell & PLAYER_TWO_SHOT_MASK:
-            return None
+            return "invalid_move"
 
         # Hit p1 ship?
         hit_result = "miss"
         if cell & PLAYER_ONE_SHIP_ID_MASK:
+            hit_result = "hit"
             ship_id = (cell & PLAYER_ONE_SHIP_ID_MASK) >> 2
             self.player_one_ships = self.player_one_ships[:ship_id * 3 - 1] + chr(ord(self.player_one_ships[ship_id * 3 - 1]) - 1) + self.player_one_ships[ship_id * 3:]
             if ord(self.player_one_ships[ship_id * 3 - 1]) == 0:
@@ -124,6 +126,16 @@ class GameStateModel(db.Model):
             "opponent_ships": decode_ships(self.player_two_ships),
             "grid": [ord(i) & (PLAYER_ONE_SHOT_MASK | PLAYER_TWO_SHOT_MASK) for i in self.grid_state]
         }
+
+
+    def getWinState(self) -> str:
+        '''Returns the current victory state of the game'''
+        if self.player_one_ships[0] == '\x00':
+            return "player_one_victory"
+        elif self.player_two_ships[0] == '\x00':
+            return "player_two_victory"
+        else:
+            return "in_progress"
 
 
     @classmethod

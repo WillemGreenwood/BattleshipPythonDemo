@@ -2,10 +2,15 @@ from flask import jsonify, make_response, request, current_app as app
 from random import Random
 from ..models.game_state_model import GameStateModel
 from ..services.json import validate, NEW_GAME_REQUEST_SCHEMA
-from ..services.battleship_ai import generateShips
+from ..services.battleship_ai import generateShips, move
 from .. import db
 
 r = Random()
+win_state_map = {
+    "player_one_victory": "won",
+    "player_two_victory": "lost",
+    "in_progress": "in_progress"
+}
 
 @app.route('/battleship', methods=['GET'])
 def battleship_game_state(): 
@@ -47,5 +52,29 @@ def battleship_game_new():
     return response
 
 @app.route('/battleship/move/<index>', methods=['PUSH'])
-def battleship_game_move(index): 
-    pass
+def battleship_game_move(index):
+    index = int(index)
+    user_id = request.cookies.get("battleship_user_id")
+    game = GameStateModel.query.get(user_id)
+
+    if game is None:
+        return make_response("No game found!", 404)  # Not Found
+
+    player_move_result = game.move_player_one(index)
+    move_result = {
+        "moveResult": player_move_result,
+        "opponentMoved": False
+    }
+
+    if player_move_result != "invalid_move" and game.getWinState() != "player_one_victory":
+        ai_index, ai_move_result = move(game)
+        move_result["opponentMoved"] = True
+        move_result["opponentMove"] = {
+                "index": ai_index,
+                "moveResult": ai_move_result
+            }
+    
+    move_result["gameState"] = win_state_map[game.getWinState()]
+    
+    db.session.commit()
+    return make_response(jsonify(move_result), 200)  # Ok
