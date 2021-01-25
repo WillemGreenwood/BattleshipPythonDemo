@@ -1,0 +1,145 @@
+{% extends 'battleship/base.html' %}
+
+{% block header %}
+<link rel="stylesheet" href="/static/battleship/vue/style.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+{% endblock %}
+
+{% block content %}
+
+{% raw %}
+<h1>Battleship</h1>
+
+<div id="vm_tag">
+    <div id="new_game" v-if="isNewGame">
+        <button v-on:click="newGame.isVertical = !newGame.isVertical">{{ newGame.isVertical ? "Vertical" : "Horizontal" }}</button>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="strip"><img src="/static/battleship/player/grid/corner.png" :style="{width: gridScale + 'px'}"></td>
+                    <td class="strip" v-for="(item, index) in rowNames">
+                        <img v-bind:src="'/static/battleship/player/grid/' + (index + 1) + '.png'" :style="{width: gridScale + 'px'}">
+                    </td>
+                </tr>
+                <tr v-for="(item, i) in rowNames">
+                    <td class="strip">
+                        <img v-bind:src="'/static/battleship/player/grid/' + item + '.png'" :style="{width: gridScale + 'px'}">
+                    </td>
+                    <td class="strip" v-for="(item, j) in rowNames">
+                        <input type="image" src="/static/battleship/player/grid/cell.png" :style="{width: gridScale + 'px'}" v-on:click="newGameSelectCell(i * 10 + j)"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="game" v-if="!isNewGame">
+        <table>
+            <tbody>
+                <tr>
+                    <td class="strip"><img src="/static/battleship/player/grid/corner.png" :style="{width: gridScale + 'px'}"></td>
+                    <td class="strip" v-for="(item, index) in rowNames">
+                        <img v-bind:src="'/static/battleship/player/grid/' + (index + 1) + '.png'" :style="{width: gridScale + 'px'}">
+                    </td>
+                </tr>
+                <tr v-for="(item, i) in rowNames">
+                    <td class="strip">
+                        <img v-bind:src="'/static/battleship/player/grid/' + item + '.png'" :style="{width: gridScale + 'px'}">
+                    </td>
+                    <td class="strip" v-for="(item, j) in rowNames">
+                        <input type="image" v-bind:src="'/static/battleship/player/grid/' + playerStateOf(grid[i][j]) + '.png'" :style="{width: gridScale + 'px'}" v-on:click="move(i * 10 + j)"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endraw %}
+
+<script>
+    var vm = new Vue({
+        el : "#vm_tag",
+        data : {
+            isNewGame: true,
+            newGame: {
+                currentShip: 0,
+                isVertical: false
+            },
+            rowNames: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+            shipNames: ["carrier", "battleship", "cruiser", "submarine", "destroyer"],
+            gridScale: 64,
+            grid: [[]],
+            state: {}
+        },
+        methods : {
+            init: function() {
+                $.getJSON("/battleship", function(data, status) {
+                    vm.populateGameState(data);
+                    vm.isNewGame = false;
+                });
+            },
+            populateGameState: function(data) {
+                vm.grid = [];
+                var current = [];
+                for (i = 0; i < 100; i++) {
+                    current.push(data["grid"][i]);
+                    if ((i + 1) % 10 == 0) {
+                        vm.grid.push(current);
+                        current = [];
+                    }
+                }
+                vm.state = data;
+            },
+            newGameSelectCell: function(index) {
+                vm.newGame[vm.shipNames[vm.newGame.currentShip]] = {
+                    index: index,
+                    isVertical: vm.newGame.isVertical
+                };
+
+                vm.newGame.currentShip++;
+                vm.newGame.isVertical = false;
+
+                if (vm.newGame.currentShip == 5) {
+                    vm.newGame.currentShip = 0;
+                    vm.sendNewGame();
+                }
+            },
+            sendNewGame: function() {
+                $.ajax({
+                    url: "/battleship",
+                    type: "PUT",
+                    contentType: 'application/json',
+                    dataType: "json",
+                    data: JSON.stringify(vm.newGame),
+                    success: function(data) {
+                        vm.init();
+                    }
+                });
+            },
+            playerStateOf: function(n) {
+                if (n & 0b0011 == 0b0011) {
+                    return "cell_hit";
+                } else if (n & 0b0001 == 0b0001) {
+                    return "cell_miss";
+                } else {
+                    return "cell";
+                }
+            },
+            move: function(index) {
+                $.ajax({
+                    url: "/battleship/move/" + index,
+                    type: "PUSH",
+                    dataType: "json",
+                    success: function(data) {
+                        
+                    }
+                });
+            }
+        }
+    });
+
+    vm.init();
+</script>
+
+{% endblock %}

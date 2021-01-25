@@ -3,6 +3,7 @@ from ..common import PLAYER_ONE_SHOT_MASK
 from ..common import PLAYER_TWO_SHOT_MASK
 from ..common import PLAYER_ONE_SHIP_ID_MASK
 from ..common import PLAYER_TWO_SHIP_ID_MASK
+from ..common import SHIPS
 from ..common import SHIP_ID_MAPPING
 from ..common import SHIP_SIZE
 from datetime import datetime
@@ -124,7 +125,7 @@ class GameStateModel(db.Model):
         return {
             "playerShips": decode_ships(self.player_one_ships),
             "opponentShips": decode_ships(self.player_two_ships),
-            "grid": [ord(i) & (PLAYER_ONE_SHOT_MASK | PLAYER_TWO_SHOT_MASK) for i in self.grid_state]
+            "grid": [(ord(i) & (PLAYER_ONE_SHOT_MASK | PLAYER_TWO_SHOT_MASK)) | (0b0100 if ord(i) & PLAYER_ONE_SHIP_ID_MASK else 0) | (0b1000 if ord(i) & PLAYER_TWO_SHIP_ID_MASK else 0) for i in self.grid_state]
         }
 
 
@@ -144,21 +145,21 @@ class GameStateModel(db.Model):
         out = GameStateModel()
 
         out.player_one_ships = chr(5)
-        for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+        for ship in SHIPS:
             out.player_one_ships += chr(player_one[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_one[ship]["isVertical"]) else "h")
 
         out.player_two_ships = chr(5)
-        for ship in ("carrier", "battleship", "cruiser", "submarine", "destroyer"):
+        for ship in SHIPS:
             out.player_two_ships += chr(player_two[ship]["index"]) + chr(SHIP_SIZE[ship]) + ("v" if chr(player_two[ship]["isVertical"]) else "h")
 
         out.grid_state = chr(0) * 100
 
-        for k, v in player_one.items():
-            for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+        for k in SHIPS:
+            for cell in [player_one[k]["index"] + (i * 10 if player_one[k]["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
                 out.grid_state = out.grid_state[:cell] + chr(SHIP_ID_MAPPING[k] << 2) + out.grid_state[cell+1:]
 
-        for k, v in player_two.items():
-            for cell in [v["index"] + (i * 10 if v["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
+        for k in SHIPS:
+            for cell in [player_two[k]["index"] + (i * 10 if player_two[k]["isVertical"] else 1) for i in range(SHIP_SIZE[k])]:
                 out.grid_state = out.grid_state[:cell] + chr(ord(out.grid_state[cell]) + (SHIP_ID_MAPPING[k] << 5)) + out.grid_state[cell+1:]
 
         return out

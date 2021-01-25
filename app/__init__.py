@@ -17,5 +17,6 @@ def create_app():
 
         # routes
         from .routes import battleship
+        from .routes import battleship_ui
 
     return app

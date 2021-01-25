@@ -22,7 +22,7 @@ def battleship_game_state():
 
     state = game.getState()
     state["gameState"] = win_state_map[game.getWinState()]
-    return make_response(jsonify(), 200)  # Ok
+    return jsonify(state)
 
 
 @app.route('/battleship', methods=['PUT'])

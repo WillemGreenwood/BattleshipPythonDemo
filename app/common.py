@@ -2,6 +2,7 @@ PLAYER_ONE_SHOT_MASK = 0b00000001
 PLAYER_TWO_SHOT_MASK = 0b00000010
 PLAYER_ONE_SHIP_ID_MASK = 0b00011100
 PLAYER_TWO_SHIP_ID_MASK = 0b11100000
+SHIPS = ("carrier", "battleship", "cruiser", "submarine", "destroyer")
 SHIP_ID_MAPPING = {
     "carrier"    : 0b001,  # 1
     "battleship" : 0b010,  # 2

@@ -6,13 +6,11 @@
             "properties": {
                 "index": {
                     "type": "integer",
-                    "required": true,
                     "minimum": 0,
                     "maximum": 99
                 },
                 "isVertical": {
-                    "type": "boolean",
-                    "required": true
+                    "type": "boolean"
                 }
             }
         }
@@ -20,10 +18,10 @@
     
     "type": "object",
     "properties": {
-        "carrier": { "$ref": "#/definitions/ship", "required": true },
-        "battleship": { "$ref": "#/definitions/ship", "required": true },
-        "cruiser": { "$ref": "#/definitions/ship", "required": true },
-        "submarine": { "$ref": "#/definitions/ship", "required": true },
-        "destroyer": { "$ref": "#/definitions/ship", "required": true }
+        "carrier": { "$ref": "#/definitions/ship" },
+        "battleship": { "$ref": "#/definitions/ship" },
+        "cruiser": { "$ref": "#/definitions/ship" },
+        "submarine": { "$ref": "#/definitions/ship" },
+        "destroyer": { "$ref": "#/definitions/ship" }
     }
 }
